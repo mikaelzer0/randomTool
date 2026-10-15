@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<!-- Atomo 3D · creato da @mikaelzer0 · https://github.com/mikaelzer0 · https://it.fiverr.com/mikaelzero -->
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atomo 3D</title>
+<style>
+:root{--bg:#fff;--line:#d6d6d6;--txt:#0a0a0a;--mut:#6d6d6d;--ink:#0a0a0a;--sel:#f1f1f1;--cs:#2563eb;--cp:#e11d48;--cd:#059669;--cf:#d97706}
+html[data-theme=dark]{--bg:#050505;--line:#2b2b2b;--txt:#f5f5f5;--mut:#9b9b9b;--ink:#f5f5f5;--sel:#151515;--cs:#60a5fa;--cp:#fb7185;--cd:#34d399;--cf:#fbbf24}
+*{box-sizing:border-box}
+body{margin:0;height:100vh;display:flex;background:var(--bg);color:var(--txt);font:14px/1.5 "Segoe UI Variable","Segoe UI",system-ui,sans-serif;overflow:hidden;transition:background .25s,color .25s}
+#view{flex:1;position:relative;min-width:0}
+canvas{display:block;cursor:grab}canvas:active{cursor:grabbing}
+#hud{position:absolute;left:20px;bottom:16px;color:var(--mut);font-size:12px;pointer-events:none}
+#th{position:absolute;top:16px;right:16px;width:36px;height:36px;padding:0;border-radius:50%;font-size:17px;line-height:1}
+#side{width:370px;background:var(--bg);border-left:1px solid var(--line);padding:26px 24px;overflow:auto}
+h1{margin:0;font-size:92px;line-height:.95;font-weight:200;letter-spacing:-.04em;display:flex;gap:10px}
+h1 small{font-size:14px;letter-spacing:0;color:var(--mut);font-weight:400;margin-top:10px}
+#nm{font-size:20px;font-weight:300;margin:6px 0 20px}
+.row{display:flex;gap:8px;margin:10px 0;align-items:center;flex-wrap:wrap}
+input[type=text]{flex:1;min-width:0;background:transparent;border:1px solid var(--line);color:var(--txt);padding:8px 14px;border-radius:999px;outline:0}
+input[type=text]:focus{border-color:var(--ink)}
+button{background:transparent;border:1px solid var(--line);color:var(--txt);padding:6px 13px;border-radius:999px;cursor:pointer;font:inherit;transition:.15s}
+button:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+select{background:transparent;color:var(--txt);border:1px solid var(--line)}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;background:transparent;height:18px;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--ink)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--bg);border:1px solid var(--ink);margin-top:-7px}
+input[type=range]::-moz-range-track{height:1px;background:var(--ink)}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--bg);border:1px solid var(--ink)}
+input[type=checkbox]{accent-color:var(--ink)}
+label{color:var(--mut);display:flex;gap:6px;align-items:center;cursor:pointer}
+table{width:100%;border-collapse:collapse;margin:18px 0 6px}
+td{padding:7px 0;border-top:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:1px solid var(--line)}
+td:first-child{color:var(--mut);width:46%}
+#cfg{font-size:19px;font-weight:300;word-break:break-word;margin-top:2px}
+.cap{margin-top:22px;color:var(--mut);font-size:12.5px}
+details{margin-top:18px;color:var(--mut)}summary{cursor:pointer}details .row{color:var(--txt)}
+.rw{display:flex;align-items:center;gap:6px;margin:3px 0;padding:3px 6px;border-radius:8px;cursor:pointer}
+.rw:hover{background:var(--sel)}
+.rw.on{background:var(--sel);outline:1px solid var(--c,var(--ink))}
+.lb{width:30px;color:var(--c,var(--mut));font-size:13px;font-weight:600}
+.bx{display:inline-flex;width:32px;height:26px;border:1px solid var(--c,var(--ink));color:var(--c,var(--ink));align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.bx.on{background:var(--c,var(--ink));color:var(--bg)}
+#exp{margin-top:18px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;font-size:13px;line-height:1.6}
+#exp details{margin:0 0 8px}
+#legend{position:absolute;top:18px;left:20px;display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--mut);pointer-events:none}
+#legend span{display:flex;align-items:center;gap:8px}
+#legend i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+#legend em{font-style:normal;color:var(--c);font-weight:600}
+#probe{position:absolute;left:20px;bottom:20px;width:310px;padding:14px 16px;background:var(--bg);border:1px solid var(--line);border-radius:14px}
+#probe .pt{color:var(--mut);font-size:12.5px}
+.pct{font-size:46px;font-weight:200;letter-spacing:-.03em;line-height:1.05}
+.pct small{font-size:20px}
+#ps{font-size:12.5px;color:var(--mut);min-height:38px;margin-bottom:4px}
+#probe details{margin-top:8px}
+#probe p{margin:6px 0 0;font-size:12.5px;line-height:1.55;color:var(--txt)}
+#tip{position:fixed;display:none;pointer-events:none;background:var(--bg);border:1px solid var(--ink);border-radius:10px;padding:7px 10px;font-size:12.5px;line-height:1.5;z-index:5}
+#tb{position:absolute;top:16px;right:62px}
+#pt{position:fixed;inset:0;background:var(--bg);z-index:20;display:none;flex-direction:column}
+#pt.on{display:flex}
+#pth{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line)}
+#pth h2{margin:0;font-size:20px;font-weight:300;white-space:nowrap}
+#vw{display:flex;gap:6px;overflow-x:auto;flex:1;padding:2px}
+#vw button{white-space:nowrap}
+#vw button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#ptb{flex:1;display:flex;min-height:0}
+#ptg{flex:1;overflow:auto;padding:18px 24px}
+#grid{display:grid;grid-template-columns:22px repeat(18,minmax(46px,1fr));gap:3px;min-width:900px}
+.gl{display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--mut)}
+.ce{aspect-ratio:1;border:1px solid;border-radius:6px;padding:3px 4px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:opacity .15s,transform .1s;min-width:0}
+.ce:hover{transform:scale(1.08);z-index:2}
+.ce.sel{outline:2px solid var(--ink);outline-offset:1px}
+.ce.dim{opacity:.15}
+.ce .t{display:flex;justify-content:space-between;font-size:9px;opacity:.8}
+.ce i{font-style:normal}
+.ce .s{font-size:17px;font-weight:600;line-height:1}
+.ce .n{font-size:7.5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;opacity:.8}
+.ph{border:1px dashed var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--mut)}
+#pta{width:360px;border-left:1px solid var(--line);padding:20px 22px;overflow:auto}
+#pta p{font-size:13px;line-height:1.55;margin:6px 0}
+.lg{display:flex;align-items:center;gap:8px;padding:3px 6px;border-radius:6px;cursor:pointer;font-size:13px}
+.lg:hover,.lg.on{background:var(--sel)}
+.lg i{width:14px;height:14px;border-radius:4px;border:1px solid}
+.lg small{margin-left:auto;color:var(--mut)}
+.bar{height:12px;border-radius:6px;margin:8px 0 4px}
+.bl{display:flex;justify-content:space-between;font-size:12px;color:var(--mut)}
+.dh{display:flex;align-items:center;gap:14px;margin:18px 0 4px}
+.ds{font-size:54px;font-weight:200;line-height:1}
+#why{color:var(--txt)}
+ol.why{margin:8px 0 0;padding-left:20px;font-size:13px;line-height:1.55}
+ol.why li{margin:4px 0}
+@media(max-width:900px){#ptb{flex-direction:column;overflow:auto}#pta{width:100%;border-left:0;border-top:1px solid var(--line)}}
+@property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes rgb{to{--a:360deg}}
+.cr,.pill,#crb{border:2px solid transparent;background:linear-gradient(var(--bg),var(--bg)) padding-box,conic-gradient(from var(--a),#ff0040,#ffe600,#00ff6a,#00d5ff,#7a3cff,#ff00d4,#ff0040) border-box;animation:rgb 3.5s linear infinite}
+.cr{margin-top:28px;padding:16px;border-radius:16px;text-align:center;box-shadow:0 0 18px rgba(122,60,255,.25)}
+.cl{display:block;font-size:12px;color:var(--mut);letter-spacing:.04em}
+.cn{display:block;font-size:22px;font-weight:600;color:var(--txt);text-decoration:none;margin:2px 0 12px}
+.cb{display:flex;gap:8px;justify-content:center}
+.pill{padding:7px 16px;border-radius:999px;color:var(--txt);text-decoration:none;font-weight:600;font-size:13px;transition:transform .15s}
+.pill:hover{transform:translateY(-2px)}
+#crb{position:absolute;right:20px;bottom:20px;padding:8px 16px;border-radius:999px;color:var(--txt);text-decoration:none;font-size:13px;box-shadow:0 0 16px rgba(122,60,255,.3)}
+@media(max-width:760px){body{flex-direction:column}#side{width:100%;height:48vh;border-left:0;border-top:1px solid var(--line)}h1{font-size:60px}}
+</style>
+</head>
+<body>
+<div id="view"><button id="th" title="Tema chiaro / scuro">◐</button><button id="tb">Tavola periodica</button><div id="legend">
+    <span style="--c:var(--cs)"><i></i><em>s</em> sfera</span>
+    <span style="--c:var(--cp)"><i></i><em>p</em> manubrio</span>
+    <span style="--c:var(--cd)"><i></i><em>d</em> trifoglio</span>
+    <span style="--c:var(--cf)"><i></i><em>f</em> multilobata</span>
+    <span style="margin-top:6px">Trascina per ruotare · rotella per zoom · clic su una nuvola per isolarla</span>
+  </div>
+  <div id="probe">
+    <div class="pt">Sonda sferica · quanto è probabile trovare l'elettrone qui dentro?</div>
+    <div class="pct"><span id="pc">0</span><small>%</small></div>
+    <div id="ps"></div>
+    <div class="row"><input id="pr" type="range" min="0" max="10" step="0.01" value="0"></div>
+    <div class="row" id="pb"><button data-p="50">50%</button><button data-p="90">90%</button><button data-p="99">99%</button></div>
+    <details><summary>Come funziona</summary>
+      <p>Ogni puntino è un punto in cui potresti trovare l'elettrone se lo cercassi: dove i puntini sono fitti, è più probabile.</p>
+      <p>Non esiste un'orbita: l'elettrone è una nuvola, e la sua forma dipende dal sottoguscio (s, p, d, f).</p>
+      <p>La sfera trasparente è una sonda: la percentuale dice quanta nuvola ci sta dentro. I pulsanti trovano il raggio che ne contiene il 50%, il 90% o il 99%.</p>
+      <p>Passa il mouse sulla nuvola per vedere a quale orbitale appartiene un punto e a che distanza dal nucleo si trova.</p>
+    </details>
+  </div>
+  <div id="tip"></div>
+  <a id="crb" href="https://github.com/mikaelzer0" target="_blank" rel="noopener">Creato da <b>@mikaelzer0</b></a></div>
+<div id="side">
+  <h1><span id="sy">H</span><small id="zz"></small></h1>
+  <div id="nm"></div>
+  <div class="row"><button id="pv">◀</button><input id="q" type="text" placeholder="Simbolo, nome o numero (es. Fe, ferro, 26)"><button id="nx">▶</button></div>
+  <div class="row" id="ex" style="flex-wrap:wrap"></div>
+  <div class="row"><input id="z" type="range" min="1" max="118" value="6"></div>
+  <table id="info"></table>
+  <div class="cap">Configurazione elettronica</div>
+  <div id="cfg"></div>
+  <div class="cap">Diagramma a caselle · energia crescente verso l'alto · clicca per isolare</div>
+  <div id="dia"></div>
+  <div id="exp"></div>
+  <details open id="whyd"><summary>Perché si trova in questa posizione?</summary><div id="why"></div><div class="row"><button id="gp">Vedi nella tavola periodica →</button></div></details>
+  <details><summary>Opzioni</summary>
+  <div class="row"><span style="color:var(--mut)">Rotazione</span><input id="sp" type="range" min="0" max="3" step="0.1" value="1"></div>
+  <select id="sub" hidden></select>
+  <div class="row"><span style="color:var(--mut)">Densità</span><input id="dn" type="range" min="150" max="1200" step="50" value="500"></div>
+  <div class="row">
+    <button id="pl">Ferma</button>
+    <label><input type="checkbox" id="rg" checked>Fase ±</label>
+    <label><input type="checkbox" id="ar" checked>Rotazione auto</label>
+    <label><input type="checkbox" id="gd" checked>Assi e gusci</label>
+  </div>
+  </details>
+  <div class="cr"><span class="cl">Creato da</span><a class="cn" href="https://github.com/mikaelzer0" target="_blank" rel="noopener">@mikaelzer0</a><div class="cb"><a class="pill" href="https://github.com/mikaelzer0" target="_blank" rel="noopener">GitHub</a><a class="pill" href="https://it.fiverr.com/mikaelzero" target="_blank" rel="noopener">Fiverr</a></div></div>
+</div>
+
+<div id="pt">
+  <div id="pth"><button id="pc2">← Atomo 3D</button><h2>Tavola periodica</h2><div id="vw"></div></div>
+  <div id="ptb">
+    <div id="ptg"><div id="grid"></div></div>
+    <aside id="pta">
+      <div id="vd"></div>
+      <div id="dt"></div>
+      <details open><summary>Come leggere la tavola</summary>
+        <p><b>Righe = periodi.</b> Il numero del periodo è il guscio n più esterno occupato dagli elettroni.</p>
+        <p><b>Colonne = gruppi.</b> Stesso gruppo = stesso numero di elettroni esterni = comportamento chimico simile.</p>
+        <p><b>Blocchi.</b> s (gruppi 1-2), p (13-18), d (3-12) e f (in basso) dicono quale sottoguscio si sta riempiendo.</p>
+        <p><b>Tendenze.</b> Andando a destra in un periodo i protoni aumentano e attirano di più gli elettroni: l'atomo si rimpicciolisce, l'elettronegatività cresce e si passa da metalli a non metalli. Scendendo in un gruppo aumentano i gusci: l'atomo è più grande e cede più facilmente elettroni.</p>
+      </details>
+      <div class="cr"><span class="cl">Creato da</span><a class="cn" href="https://github.com/mikaelzer0" target="_blank" rel="noopener">@mikaelzer0</a><div class="cb"><a class="pill" href="https://github.com/mikaelzer0" target="_blank" rel="noopener">GitHub</a><a class="pill" href="https://it.fiverr.com/mikaelzero" target="_blank" rel="noopener">Fiverr</a></div></div>
+    </aside>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ---------- DATI ---------- */
+const SYM="H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og".split(" ");
+const NAME="Idrogeno Elio Litio Berillio Boro Carbonio Azoto Ossigeno Fluoro Neon Sodio Magnesio Alluminio Silicio Fosforo Zolfo Cloro Argon Potassio Calcio Scandio Titanio Vanadio Cromo Manganese Ferro Cobalto Nichel Rame Zinco Gallio Germanio Arsenico Selenio Bromo Cripto Rubidio Stronzio Ittrio Zirconio Niobio Molibdeno Tecnezio Rutenio Rodio Palladio Argento Cadmio Indio Stagno Antimonio Tellurio Iodio Xeno Cesio Bario Lantanio Cerio Praseodimio Neodimio Promezio Samario Europio Gadolinio Terbio Disprosio Olmio Erbio Tulio Itterbio Lutezio Afnio Tantalio Tungsteno Renio Osmio Iridio Platino Oro Mercurio Tallio Piombo Bismuto Polonio Astato Radon Francio Radio Attinio Torio Protoattinio Uranio Nettunio Plutonio Americio Curio Berkelio Californio Einsteinio Fermio Mendelevio Nobelio Laurenzio Rutherfordio Dubnio Seaborgio Bohrio Hassio Meitnerio Darmstadtio Roentgenio Copernicio Nihonio Flerovio Moscovio Livermorio Tennesso Oganesson".split(" ");
+const MASS=[1.008,4.003,6.94,9.012,10.81,12.011,14.007,15.999,18.998,20.18,22.99,24.305,26.982,28.085,30.974,32.06,35.45,39.95,39.098,40.078,44.956,47.867,50.942,51.996,54.938,55.845,58.933,58.693,63.546,65.38,69.723,72.63,74.922,78.971,79.904,83.798,85.468,87.62,88.906,91.224,92.906,95.95,98,101.07,102.91,106.42,107.87,112.41,114.82,118.71,121.76,127.6,126.9,131.29,132.91,137.33,138.91,140.12,140.91,144.24,145,150.36,151.96,157.25,158.93,162.5,164.93,167.26,168.93,173.05,174.97,178.49,180.95,183.84,186.21,190.23,192.22,195.08,196.97,200.59,204.38,207.2,208.98,209,210,222,223,226,227,232.04,231.04,238.03,237,244,243,247,247,251,252,257,258,259,266,267,268,269,270,277,278,281,282,285,286,289,290,293,294,294];
+const ORD="1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p 6s 4f 5d 6p 7s 5f 6d 7p".split(" ");
+const CAP={s:2,p:6,d:10,f:14}, LQ={s:0,p:1,d:2,f:3};
+/* eccezioni al principio di Aufbau */
+const OVR={24:{"4s":1,"3d":5},29:{"4s":1,"3d":10},41:{"5s":1,"4d":4},42:{"5s":1,"4d":5},44:{"5s":1,"4d":7},45:{"5s":1,"4d":8},46:{"5s":0,"4d":10},47:{"5s":1,"4d":10},57:{"4f":0,"5d":1},58:{"4f":1,"5d":1},64:{"4f":7,"5d":1},78:{"6s":1,"5d":9},79:{"6s":1,"5d":10},89:{"5f":0,"6d":1},90:{"5f":0,"6d":2},91:{"5f":2,"6d":1},92:{"5f":3,"6d":1},93:{"5f":4,"6d":1},96:{"5f":7,"6d":1},103:{"6d":0,"7p":1}};
+const NOBLE=[2,10,18,36,54,86,118], NOBLE_SYM={2:"He",10:"Ne",18:"Ar",36:"Kr",54:"Xe",86:"Rn"};
+const SHELL_NAME="K L M N O P Q".split(" ");
+const COL=[0xff6b6b,0xffb347,0xffe66d,0x7bed9f,0x5ad1c5,0x74b9ff,0xc792ea];
+const CAT=(z)=>{
+  const S=(...a)=>a.includes(z);
+  if(S(1,6,7,8,15,16,34))return"Non metallo";
+  if(S(5,14,32,33,51,52))return"Semimetallo";
+  if(S(9,17,35,53,85,117))return"Alogeno";
+  if(NOBLE.includes(z))return"Gas nobile";
+  if(S(3,11,19,37,55,87))return"Metallo alcalino";
+  if(S(4,12,20,38,56,88))return"Metallo alcalino-terroso";
+  if(z>=57&&z<=71)return"Lantanide";
+  if(z>=89&&z<=103)return"Attinide";
+  if((z>=21&&z<=30)||(z>=39&&z<=48)||(z>=72&&z<=80)||(z>=104&&z<=112))return"Metallo di transizione";
+  return"Metallo del blocco p";
+};
+function config(z){
+  let r=z;const c={};
+  for(const s of ORD){const k=Math.min(r,CAP[s[1]]);if(k>0)c[s]=k;r-=k;if(r<=0)break;}
+  if(OVR[z])Object.assign(c,OVR[z]);
+  for(const k in c)if(!c[k])delete c[k];
+  return c;
+}
+const sortKeys=c=>Object.keys(c).sort((a,b)=>(a[0]-b[0])||(LQ[a[1]]-LQ[b[1]]));
+const SUP="⁰¹²³⁴⁵⁶⁷⁸⁹";
+const sup=n=>String(n).split("").map(d=>SUP[d]).join("");
+const fmt=(c,skip={})=>sortKeys(c).filter(k=>c[k]!==skip[k]).map(k=>k+sup(c[k])).join(" ");
+
+/* ---------- THREE ---------- */
+const view=document.getElementById("view");
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+view.appendChild(renderer.domElement);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x070b14);
+const camera=new THREE.PerspectiveCamera(50,1,0.1,200);camera.position.z=22;
+scene.add(new THREE.AmbientLight(0xffffff,0.6));
+const pl=new THREE.PointLight(0xffffff,1.2);pl.position.set(10,12,14);scene.add(pl);
+const atom=new THREE.Group();scene.add(atom);
+
+const gN=new THREE.SphereGeometry(0.1,12,10);
+const PM=new THREE.PointsMaterial({size:0.08,vertexColors:true,transparent:true,opacity:0.6,depthWrite:false,blending:THREE.AdditiveBlending});
+const INK=new THREE.Color(),GRY=new THREE.Color();
+const probeMesh=new THREE.Mesh(new THREE.SphereGeometry(1,36,22),new THREE.MeshBasicMaterial({color:0,wireframe:true,transparent:true,opacity:0.18}));
+probeMesh.add(new THREE.Mesh(new THREE.SphereGeometry(1,36,22),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.05,depthWrite:false})));
+probeMesh.visible=false;scene.add(probeMesh);
+/* Laguerre generalizzato L_k^a(x) */
+const LAG=(k,a,x)=>{if(!k)return 1;let p=1,q=1+a-x;for(let j=1;j<k;j++){const r=((2*j+1+a-x)*q-(j+a)*p)/(j+1);p=q;q=r;}return q;};
+/* armoniche sferiche reali (parte angolare, su sfera unitaria) */
+const ANG={0:[()=>1],
+1:[(x,y,z)=>x,(x,y,z)=>y,(x,y,z)=>z],
+2:[(x,y,z)=>x*y,(x,y,z)=>y*z,(x,y,z)=>3*z*z-1,(x,y,z)=>x*z,(x,y,z)=>x*x-y*y],
+3:[(x,y,z)=>z*(5*z*z-3),(x,y,z)=>x*(5*z*z-1),(x,y,z)=>y*(5*z*z-1),(x,y,z)=>z*(x*x-y*y),(x,y,z)=>x*y*z,(x,y,z)=>x*(x*x-3*y*y),(x,y,z)=>y*(3*x*x-y*y)]};
+const AM={};
+function angMax(l,i){const k=l+"_"+i;if(AM[k])return AM[k];let m=0;
+  for(let j=0;j<4000;j++){const z=2*Math.random()-1,t=Math.random()*6.2832,s=Math.sqrt(1-z*z),a=ANG[l][i](s*Math.cos(t),s*Math.sin(t),z);m=Math.max(m,a*a);}
+  return AM[k]=m*1.05;}
+/* distribuzione radiale r^2 R(r)^2 (CDF tabulata) */
+const RC={};
+function radial(n,l){const key=n+"_"+l;if(RC[key])return RC[key];
+  const M=600,rm=8*n+12,cdf=new Float64Array(M+1),sg=new Int8Array(M+1);let s=0;
+  for(let i=1;i<=M;i++){const r=i/M*rm,L=LAG(n-l-1,2*l+1,r),R=Math.pow(r,l)*Math.exp(-r/2)*L;s+=r*r*R*R;cdf[i]=s;sg[i]=L<0?-1:1;}
+  for(let i=0;i<=M;i++)cdf[i]/=s;
+  return RC[key]={cdf,sg,rm,M};}
+/* nuvola di punti campionata da |psi|^2 di un orbitale (n,l,m) */
+function cloud(n,l,i,count){
+  const {cdf,sg,rm,M}=radial(n,l),f=ANG[l][i],fm=angMax(l,i),g=(1+0.9*n)/(3*n);
+  const pos=new Float32Array(count*3),col=new Float32Array(count*3),sgn=new Int8Array(count);
+  const c0=new THREE.Color(tc("spdf"[l])),c1=c0.clone().lerp(scene.background,0.6);
+  for(let p=0;p<count;p++){
+    const u=Math.random()*0.97;let lo=0,hi=M;
+    while(lo<hi){const m=(lo+hi)>>1;if(cdf[m]>=u)hi=m;else lo=m+1;}
+    const r=Math.max(0,(lo-Math.random())/M*rm*g);
+    let x,y,z,a;
+    do{z=2*Math.random()-1;const t=Math.random()*6.2832,s=Math.sqrt(1-z*z);x=s*Math.cos(t);y=s*Math.sin(t);a=f(x,y,z);}while(Math.random()*fm>a*a);
+    pos[p*3]=x*r;pos[p*3+1]=y*r;pos[p*3+2]=z*r;
+    const neg=(a<0)!==(sg[lo]<0);sgn[p]=neg?-1:1;((ui.rg.checked&&neg)?c1:c0).toArray(col,p*3);
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
+  geo.setAttribute("color",new THREE.BufferAttribute(col,3));
+  const P=new THREE.Points(geo,PM);P.userData={n,l,i,sgn};return P;
+}
+const pick={k:"",i:-1};let curC={};
+const hex=c=>c.toString(16).padStart(6,"0");
+const TCL={s:"#2563eb",p:"#e11d48",d:"#059669",f:"#d97706"},TCD={s:"#60a5fa",p:"#fb7185",d:"#34d399",f:"#fbbf24"};
+const tc=L=>(dark?TCD:TCL)[L];
+let dist=new Float32Array(0),rmax=1;
+const pctAt=r=>{let lo=0,hi=dist.length;while(lo<hi){const m=(lo+hi)>>1;if(dist[m]<=r)lo=m+1;else hi=m;}return dist.length?100*lo/dist.length:0;};
+function probe(){
+  const r=+ui.pr.value,p=pctAt(r);
+  probeMesh.scale.setScalar(Math.max(r,0.001));probeMesh.visible=r>0.02;
+  $("pc").textContent=p<10?p.toFixed(1):Math.round(p);
+  $("ps").textContent=r<0.02?"Sposta il cursore per aprire una sfera attorno al nucleo."
+    :p>=99?"Quasi tutta la nuvola è dentro: oltre questo raggio l'elettrone si trova molto raramente."
+    :`Dentro la sfera c'è il ${Math.round(p)}% della nuvola che stai guardando; il resto è più lontano dal nucleo.`;
+}
+function recalc(){
+  const L=[];
+  orbs.forEach(o=>{if(!o.P.visible)return;const a=o.P.geometry.attributes.position.array;for(let j=0;j<a.length;j+=3)L.push(Math.hypot(a[j],a[j+1],a[j+2]));});
+  dist=Float32Array.from(L).sort();
+  rmax=dist.length?dist[Math.floor(dist.length*0.995)]*1.05:1;
+  ui.pr.max=rmax.toFixed(2);ui.pr.step=(rmax/500).toFixed(3);
+  if(+ui.pr.value>rmax)ui.pr.value=rmax;
+  probe();
+}
+const setVis=()=>{orbs.forEach(o=>o.P.visible=(!pick.k||o.k===pick.k)&&(pick.i<0||o.i===pick.i));recalc();};
+const NAMES={s:["s"],p:["px","py","pz"],d:["dxy","dyz","dz²","dxz","dx²−y²"],f:["fz³","fxz²","fyz²","fz(x²−y²)","fxyz","fx(x²−3y²)","fy(3x²−y²)"]};
+const FORM={s:"Forma sferica: la probabilità dipende solo dalla distanza dal nucleo, non dalla direzione.",
+p:"Due lobi opposti lungo un asse (x, y o z). Al centro c'è un piano nodale: lì la probabilità di trovare l'elettrone è zero.",
+d:"Di solito quattro lobi a trifoglio (dz² ha due lobi più un anello). Sono gli orbitali tipici dei metalli di transizione.",
+f:"Forme complesse a molti lobi. Sono gli orbitali di lantanidi e attinidi."};
+function diagram(){
+  $("dia").innerHTML=ORD.filter(k=>curC[k]).reverse().map(k=>{
+    const n=+k[0],l=LQ[k[1]],no=2*l+1,cnt=curC[k];let b="";
+    for(let i=0;i<no;i++){const o=(i<cnt?1:0)+(i<cnt-no?1:0);
+      b+=`<span class="bx${pick.k===k&&pick.i===i?" on":""}" data-k="${k}" data-i="${i}">${o==2?"↑↓":o?"↑":""}</span>`;}
+    return `<div class="rw${pick.k===k?" on":""}" data-k="${k}" style="--c:var(--c${k[1]})"><span class="lb">${k}</span>${b}</div>`;}).join("");
+}
+function explain(){
+  const e=$("exp");
+  if(!pick.k){
+    const last=ORD.filter(k=>curC[k]).pop();
+    e.innerHTML=`<details><summary><b>Regole di riempimento</b></summary>① <b>Aufbau</b>: si riempiono prima i livelli a energia minore, in ordine di n+l (a parità, n minore). Per questo 4s viene prima di 3d.<br>② <b>Pauli</b>: un orbitale contiene al massimo 2 elettroni, con spin opposti (↑↓).<br>③ <b>Hund</b>: in orbitali della stessa energia gli elettroni stanno prima da soli con spin parallelo, poi si accoppiano.</details>L'ultimo sottoguscio riempito per ${NAME[Z-1].toLowerCase()} è <b>${last}</b> (n+l = ${+last[0]+LQ[last[1]]}).`
+    +(OVR[Z]?`<br><b>Eccezione:</b> ${SYM[Z-1]} non segue esattamente l'Aufbau. Un sottoguscio d o f mezzo pieno o pieno è più stabile, quindi un elettrone si sposta per raggiungerlo.`:"")
+    +`<br><i>Clicca un sottoguscio o una casella per vederne la forma.</i>`;return;}
+  const n=+pick.k[0],L=pick.k[1],l=LQ[L],no=2*l+1,cnt=curC[pick.k];
+  let h=`<b style="color:var(--c${L})">Sottoguscio ${pick.k}</b>: ${cnt} elettroni su ${no} orbital${no>1?"i":"e"} (massimo ${CAP[L]}).<br>`
+   +`<b>Numeri quantici</b>: n = ${n} (guscio ${SHELL_NAME[n-1]}), l = ${l} (${L}), m<sub>l</sub> da −${l} a +${l}, spin m<sub>s</sub> = ±½ (↑ ↓).<br>`
+   +`<b>Nodi</b>: radiali n−l−1 = ${n-l-1}, angolari l = ${l}. <b>Energia</b>: n+l = ${n+l}.<br>${FORM[L]}`;
+  if(pick.i>=0){const o=(pick.i<cnt?1:0)+(pick.i<cnt-no?1:0);
+    h+=`<br><b>Orbitale ${n}${NAMES[L][pick.i]}</b>: ${o?`contiene ${o} elettron${o>1?"i (accoppiati ↑↓)":"e (spin ↑)"}`:"è vuoto, quindi non viene disegnato"}.`;}
+  h+=`<br>I due colori dei lobi sono il segno (fase) della funzione d'onda, non cariche elettriche.`;
+  e.innerHTML=h;
+}
+const refresh=()=>{setVis();diagram();explain();};
+const mP=new THREE.MeshPhongMaterial({color:0xff5d5d,shininess:60});
+const mN=new THREE.MeshPhongMaterial({color:0xaab4c8,shininess:60});
+let orbs=[], Z=6;
+
+function build(z){
+  Z=z;
+  while(atom.children.length){const o=atom.children.pop();o.traverse(x=>{if(x.geometry&&x.geometry!==gN)x.geometry.dispose();});}
+  orbs=[];
+  /* nucleo */
+  const A=Math.round(MASS[z-1]), R=0.13*Math.cbrt(A), ga=Math.PI*(3-Math.sqrt(5));
+  for(let i=0;i<A;i++){
+    const y=A>1?1-2*(i+.5)/A:0, rr=Math.sqrt(1-y*y)*R*Math.cbrt((i+.5)/A), th=i*ga, d=R*Math.cbrt((i+.5)/A);
+    const isP=Math.floor((i+1)*z/A)>Math.floor(i*z/A);
+    const m=new THREE.Mesh(gN,isP?mP:mN);
+    m.position.set(Math.cos(th)*rr,y*d,Math.sin(th)*rr);atom.add(m);
+  }
+  /* orbitali: un'orbitale per ogni (n,l,m), riempimento secondo Hund */
+  const c=config(z), N=+ui.dn.value, nmax=Math.max(...Object.keys(c).map(k=>+k[0])), prev=ui.sub.value;
+  ui.sub.innerHTML='<option value="">Tutti i sottogusci</option>'+sortKeys(c).map(k=>`<option value="${k}">${k} (${c[k]} e⁻)</option>`).join("");
+  ui.sub.value=c[prev]?prev:"";
+  for(const k of sortKeys(c)){
+    const n=+k[0], l=LQ[k[1]], cnt=c[k], no=2*l+1;
+    for(let i=0;i<no;i++){
+      const occ=(i<cnt?1:0)+(i<cnt-no?1:0);
+      if(!occ)continue;
+      const P=cloud(n,l,i,occ*N);P.userData.k=k;atom.add(P);orbs.push({k,P,i});
+    }
+  }
+  if(ui.gd.checked){
+    const ext=(1+0.9*nmax)*1.5, lm=new THREE.LineBasicMaterial({color:INK,transparent:true,opacity:0.35}), rm=new THREE.LineBasicMaterial({color:INK,transparent:true,opacity:0.18});
+    const lab=(t,v)=>{const cn=document.createElement("canvas");cn.width=cn.height=64;const g=cn.getContext("2d");g.fillStyle="#"+INK.getHexString();g.font="300 40px system-ui";g.textAlign="center";g.textBaseline="middle";g.fillText(t,32,34);
+      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cn),transparent:true,opacity:.75}));sp.scale.setScalar(ext*0.12);sp.position.copy(v);atom.add(sp);};
+    [["x",1,0,0],["y",0,1,0],["z",0,0,1]].forEach(([t,x,y,z])=>{const a=new THREE.Vector3(x,y,z).multiplyScalar(ext);
+      atom.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a.clone().negate(),a]),lm));lab(t,a.clone().multiplyScalar(1.07));});
+    for(const n of new Set(Object.keys(c).map(k=>+k[0]))){const r=1+0.9*n,pts=[];
+      for(let i=0;i<=96;i++){const t=i/96*6.2832;pts.push(new THREE.Vector3(Math.cos(t)*r,Math.sin(t)*r,0));}
+      atom.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),rm));}
+  }
+  pick.k=ui.sub.value;if(!pick.k)pick.i=-1;
+  setVis();
+  camera.position.z=Math.max(12,(1+0.9*nmax)*3.4);
+  info(z,c);
+}
+
+/* ---------- INFO ---------- */
+const $=id=>document.getElementById(id);
+const ui={rg:$("rg"),ar:$("ar"),sp:$("sp"),z:$("z"),q:$("q"),pl:$("pl"),sub:$("sub"),dn:$("dn"),gd:$("gd"),pr:$("pr")};
+function info(z,c){
+  const keys=sortKeys(c), nmax=NOBLE.findIndex(n=>z<=n)+1;
+  const last=ORD.filter(s=>c[s]).pop(), blk=((z>=57&&z<=70)||(z>=89&&z<=102))?"f":z===103?"d":last[1];
+  const outer=keys.filter(k=>+k[0]===nmax).reduce((a,k)=>a+c[k],0);
+  let grp;
+  if(blk==="f")grp="— ("+(z<=71?"lantanidi":"attinidi")+")";
+  else if(z===2)grp=18;
+  else if(blk==="s")grp=c[last];
+  else if(blk==="p")grp=12+c[last];
+  else grp=keys.filter(k=>k===nmax+"s"||(k[1]==="d"&&+k[0]===nmax-1)).reduce((a,k)=>a+c[k],0)||"—";
+  if(z===103)grp=3;
+  const A=Math.round(MASS[z-1]);
+  const ng=[...NOBLE].reverse().find(n=>n<z);
+  let short=fmt(c);
+  if(ng){const nc=config(ng);const sk={};for(const k in nc)if(c[k]===nc[k])sk[k]=nc[k];short="["+NOBLE_SYM[ng]+"] "+fmt(c,sk);}
+  $("sy").textContent=SYM[z-1];$("zz").textContent="Z = "+z;$("nm").textContent=NAME[z-1];
+  const rows=[["Massa",MASS[z-1]+" u"],["Neutroni","≈ "+(A-z)],["Periodo · Gruppo",nmax+" · "+grp],["Categoria",CAT(z)],["Elettroni di valenza",outer]];
+  $("info").innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("");
+  $("cfg").textContent=short;$("cfg").title=fmt(c);
+  ui.z.value=z;curC=c;diagram();explain();whyBox();
+}
+
+/* ---------- CONTROLLI ---------- */
+const go=z=>build(Math.max(1,Math.min(118,z)));
+ui.z.oninput=()=>go(+ui.z.value);
+$("pv").onclick=()=>go(Z-1);$("nx").onclick=()=>go(Z+1);
+ui.q.onkeydown=e=>{
+  if(e.key!=="Enter")return;
+  const v=ui.q.value.trim().toLowerCase();if(!v)return;
+  let i=SYM.findIndex(s=>s.toLowerCase()===v);
+  if(i<0)i=NAME.findIndex(s=>s.toLowerCase()===v);
+  if(i<0&&/^\d+$/.test(v))i=+v-1;
+  if(i<0)i=NAME.findIndex(s=>s.toLowerCase().startsWith(v));
+  if(i>=0&&i<118){go(i+1);ui.q.value="";}
+};
+let paused=false;
+ui.pl.onclick=()=>{paused=!paused;ui.pl.textContent=paused?"Riprendi":"Ferma";};
+ui.rg.onchange=ui.dn.onchange=ui.gd.onchange=()=>go(Z);
+ui.sub.onchange=()=>{pick.k=ui.sub.value;pick.i=-1;refresh();};
+ui.pr.oninput=probe;
+$("pb").onclick=e=>{const q=e.target.dataset.p;if(!q||!dist.length)return;ui.pr.value=dist[Math.min(dist.length-1,Math.floor(dist.length*q/100))];probe();};
+$("dia").onclick=e=>{const t=e.target.closest("[data-k]");if(!t)return;
+  const k=t.dataset.k,i=t.dataset.i===undefined?-1:+t.dataset.i;
+  if(pick.k===k&&pick.i===i){pick.k="";pick.i=-1;}else{pick.k=k;pick.i=i;}
+  ui.sub.value=pick.k;refresh();};
+$("ex").innerHTML=["H","C","O","Ne","Fe","Cr","Cu","U"].map(x=>`<button data-z="${SYM.indexOf(x)+1}" title="${NAME[SYM.indexOf(x)]}">${x}</button>`).join("");
+$("ex").onclick=e=>{const z=e.target.dataset.z;if(z)go(+z);};
+let drag=false,px=0,py=0;
+const cv=renderer.domElement;
+let sx=0,sy=0,hov=null;
+const ray=new THREE.Raycaster(),mv=new THREE.Vector2();
+function hit(e){
+  const r=cv.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+  ray.setFromCamera(mv,camera);ray.params.Points.threshold=0.012*camera.position.z;
+  const h=ray.intersectObjects(orbs.filter(o=>o.P.visible).map(o=>o.P))[0];
+  if(!h)return null;
+  const a=h.object.geometry.attributes.position.array,j=h.index*3;
+  return {u:h.object.userData,idx:h.index,r:Math.hypot(a[j],a[j+1],a[j+2])};
+}
+cv.onpointerdown=e=>{drag=true;px=sx=e.clientX;py=sy=e.clientY;$("tip").style.display="none";cv.setPointerCapture(e.pointerId);};
+cv.onpointerup=e=>{drag=false;
+  if(Math.hypot(e.clientX-sx,e.clientY-sy)<4){const h=hit(e);if(h){pick.k=h.u.k;pick.i=h.u.i;ui.sub.value=pick.k;refresh();}}};
+cv.onpointermove=e=>{if(!drag){hov=e;return;}atom.rotation.y+=(e.clientX-px)*0.008;atom.rotation.x+=(e.clientY-py)*0.008;px=e.clientX;py=e.clientY;};
+cv.onpointerleave=()=>{hov=null;$("tip").style.display="none";};
+cv.addEventListener("wheel",e=>{e.preventDefault();camera.position.z=Math.max(5,Math.min(80,camera.position.z*(1+e.deltaY*0.001)));},{passive:false});
+function resize(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}
+addEventListener("resize",resize);resize();
+
+/* ---------- LOOP ---------- */
+let t0=performance.now();
+(function loop(t){
+  requestAnimationFrame(loop);
+  const dt=Math.min((t-t0)/1000,0.05);t0=t;
+  const s=paused?0:+ui.sp.value;
+  PM.size=0.0055*camera.position.z;
+  if(ui.ar.checked&&!drag)atom.rotation.y+=dt*0.15*s;
+  if(hov&&!drag){
+    const e=hov,h=hit(e),tp=$("tip");hov=null;
+    if(!h)tp.style.display="none";
+    else{const L="spdf"[h.u.l];
+      tp.innerHTML=`<b style="color:${tc(L)}">${h.u.n}${NAMES[L][h.u.i]}</b> · fase ${h.u.sgn[h.idx]>0?"+":"−"}<br>distanza dal nucleo: ${h.r.toFixed(1)}<br>il ${Math.round(pctAt(h.r))}% della nuvola è più vicino al nucleo di qui`;
+      tp.style.left=e.clientX+14+"px";tp.style.top=e.clientY+14+"px";tp.style.display="block";}
+  }
+  renderer.render(scene,camera);
+})(t0);
+/* ---------- TAVOLA PERIODICA ---------- */
+const EN="2.20 0 0.98 1.57 2.04 2.55 3.04 3.44 3.98 0 0.93 1.31 1.61 1.90 2.19 2.58 3.16 0 0.82 1.00 1.36 1.54 1.63 1.66 1.55 1.83 1.88 1.91 1.90 1.65 1.81 2.01 2.18 2.55 2.96 3.00 0.82 0.95 1.22 1.33 1.60 2.16 1.90 2.20 2.28 2.20 1.93 1.69 1.78 1.96 2.05 2.10 2.66 2.60 0.79 0.89 1.10 1.12 1.13 1.14 1.13 1.17 1.20 1.20 1.10 1.22 1.23 1.24 1.25 1.10 1.27 1.30 1.50 2.36 1.90 2.20 2.20 2.28 2.54 2.00 1.62 2.33 2.02 2.00 2.20 2.20 0.70 0.90 1.10 1.30 1.50 1.38 1.36 1.28 1.13 1.28 1.30 1.30 1.30 1.30 1.30 1.30 1.30".split(" ").map(Number), MP="14 1 454 1560 2349 3823 63 54 53 25 371 923 934 1687 317 388 172 84 337 1115 1814 1941 2183 2180 1519 1811 1768 1728 1358 693 303 1211 1090 494 266 116 313 1050 1799 2128 2750 2896 2430 2607 2237 1828 1235 594 430 505 904 723 387 161 302 1000 1193 1068 1208 1297 1315 1345 1099 1585 1629 1680 1734 1802 1818 1097 1925 2506 3290 3695 3459 3306 2719 2041 1337 234 577 601 545 527 575 202 300 973 1323 2115 1841 1405 917 913 1449 1613 1259 1173 1133 1800 1100 1100 1900".split(" ").map(Number);
+while(EN.length<118)EN.push(0);while(MP.length<118)MP.push(0);
+function props(z){
+  const c=config(z),keys=sortKeys(c),nmax=NOBLE.findIndex(n=>z<=n)+1,last=ORD.filter(k=>c[k]).pop();
+  const blk=((z>=57&&z<=70)||(z>=89&&z<=102))?"f":z===103?"d":last[1];
+  const outer=keys.filter(k=>+k[0]===nmax).reduce((a,k)=>a+c[k],0);
+  let g;
+  if(blk==="f")g=0;else if(z===103)g=3;else if(z===2)g=18;else if(blk==="s")g=c[last];else if(blk==="p")g=12+c[last];
+  else g=keys.filter(k=>k===nmax+"s"||(k[1]==="d"&&+k[0]===nmax-1)).reduce((a,k)=>a+c[k],0);
+  return {c,nmax,last,blk,outer,g};
+}
+function cfgShort(z){const c=config(z),ng=[...NOBLE].reverse().find(n=>n<z);if(!ng)return fmt(c);
+  const nc=config(ng),sk={};for(const k in nc)if(c[k]===nc[k])sk[k]=nc[k];return "["+NOBLE_SYM[ng]+"] "+fmt(c,sk);}
+const GAS=[1,2,7,8,9,10,17,18,36,54,86];
+const state=z=>GAS.includes(z)?"Gas":(z===35||z===80)?"Liquido":(z>=99||z===85||z===87)?"Sconosciuto":"Solido";
+const origin=z=>(z===43||z===61||z>=93)?"Sintetico":z>=84?"Radioattivo naturale":"Stabile (o quasi)";
+function behav(z,P){
+  const cat=CAT(z);
+  if(NOBLE.includes(z))return "Il guscio esterno è completo: l'atomo è molto stabile e quasi non reagisce.";
+  if(cat==="Metallo alcalino")return "Ha 1 solo elettrone esterno e lo cede facilmente → forma ioni +1 ed è molto reattivo (per esempio con l'acqua).";
+  if(cat==="Metallo alcalino-terroso")return "Ha 2 elettroni esterni e li cede → forma ioni +2 ed è piuttosto reattivo.";
+  if(cat==="Alogeno")return "Gli manca 1 elettrone per completare il guscio: lo acquista → forma ioni −1 ed è molto reattivo.";
+  if(cat==="Metallo di transizione")return "Sta riempiendo il sottoguscio d: può cedere elettroni in modi diversi (più numeri di ossidazione), spesso forma composti colorati ed è un buon conduttore.";
+  if(cat==="Lantanide"||cat==="Attinide")return "Sta riempiendo il sottoguscio f: elementi molto simili fra loro (le terre rare per i lantanidi); gli attinidi sono quasi tutti radioattivi.";
+  if(z===1)return "Ha 1 elettrone: può cederlo (H⁺), acquistarne uno (H⁻) o condividerlo (legami covalenti).";
+  if(cat==="Non metallo")return `Gli mancano ${8-P.outer} elettroni per arrivare a 8 (regola dell'ottetto): li acquista o li condivide → comportamento da non metallo.`;
+  if(cat==="Semimetallo")return "Valenza intermedia: proprietà a metà fra metalli e non metalli (semiconduttori).";
+  return `Ha pochi elettroni esterni (${P.outer}) e tende a cederli → comportamento da metallo.`;
+}
+function why(z){
+  const P=props(z),o=P.outer;
+  return `<ol class="why">
+<li>${z} protoni → ${z} elettroni (atomo neutro).</li>
+<li>Gli elettroni riempiono i sottogusci dal livello più basso (Aufbau): l'ultimo è <b style="color:${tc(P.last[1])}">${P.last}</b>.</li>
+<li>Il guscio più esterno è n = ${P.nmax} → <b>periodo ${P.nmax}</b> (la riga della tavola).</li>
+<li>Il sottoguscio che si sta riempiendo è di tipo ${P.blk} → <b>blocco ${P.blk}</b> (s: gruppi 1-2 · p: 13-18 · d: 3-12 · f: in basso).</li>
+<li>Elettroni nel guscio esterno: <b>${o}</b>. ${P.g?`Sono la ragione del <b>gruppo ${P.g}</b>: gli elementi della stessa colonna hanno gli stessi elettroni esterni e proprietà simili.`:"Gli elementi del blocco f sono molto simili fra loro e stanno sotto la tavola."}</li>
+<li>${behav(z,P)}</li></ol>`;
+}
+const whyBox=()=>{$("why").innerHTML=why(Z);};
+const PS=[1,3,11,19,37,55,87];
+const pos=z=>{
+  if(z>=57&&z<=71)return[z-54,10];if(z>=89&&z<=103)return[z-86,11];
+  if(z<=2)return[z===1?1:18,2];
+  const p=NOBLE.findIndex(n=>z<=n)+1;
+  return[z-PS[p-1]<2?z-PS[p-1]+1:18-(NOBLE[p-1]-z),p+1];
+};
+const HC={"Metallo alcalino":8,"Metallo alcalino-terroso":30,"Non metallo":52,"Semimetallo":95,"Metallo del blocco p":170,"Metallo di transizione":205,"Lantanide":245,"Attinide":275,"Alogeno":305,"Gas nobile":335};
+const GR=(h,v,t,f,lo,hi)=>({h,v,t,f,lo,hi});
+const VIEWS=[
+ {nm:"Categorie",f:CAT,H:k=>HC[k],keys:Object.keys(HC),d:"Gli elementi sono raggruppati per comportamento chimico. Clicca una voce per evidenziare solo quella famiglia."},
+ {nm:"Blocchi",f:z=>props(z).blk,H:k=>({s:221,p:347,d:160,f:32})[k],keys:["s","p","d","f"],lab:k=>"Blocco "+k,d:"Il blocco dice quale sottoguscio sta venendo riempito: s (gruppi 1-2), p (13-18), d (3-12, metalli di transizione), f (lantanidi e attinidi). Sono gli stessi colori delle nuvole nell'atomo 3D."},
+ {nm:"Gruppi",f:z=>props(z).g||"f",H:k=>k==="f"?null:(k-1)*19,keys:[...Array(18)].map((_,i)=>i+1).concat("f"),lab:k=>k==="f"?"Blocco f (sotto la tavola)":"Gruppo "+k,val:z=>props(z).g||"",d:"Ogni colonna è un gruppo: gli elementi dello stesso gruppo hanno lo stesso numero di elettroni esterni e quindi proprietà chimiche simili."},
+ {nm:"Periodi",f:z=>props(z).nmax,H:k=>[8,35,58,140,185,225,285][k-1],keys:[1,2,3,4,5,6,7],lab:k=>"Periodo "+k,val:z=>props(z).nmax,d:"Ogni riga è un periodo: il numero del periodo è il guscio più esterno occupato (n). Più in basso = più gusci = atomi più grandi."},
+ {nm:"Stato fisico",f:state,H:k=>({Gas:190,Liquido:25,Solido:255})[k],keys:["Solido","Liquido","Gas","Sconosciuto"],d:"Stato a 25 °C e pressione normale. Solo bromo e mercurio sono liquidi; 11 elementi sono gas."},
+ {nm:"Elettronegatività",G:GR(340,z=>EN[z-1]||null,x=>(x-0.7)/3.3,x=>x.toFixed(2),"0,7 · cede e⁻","4,0 · attira e⁻"),d:"Scala di Pauling: quanto un atomo attira gli elettroni di un legame. Cresce verso destra e verso l'alto: il fluoro è il più elettronegativo, il francio il meno."},
+ {nm:"Punto di fusione",G:GR(215,z=>MP[z-1]||null,x=>Math.sqrt(x/3900),x=>x,"1 K","3823 K"),d:"Temperatura di fusione in kelvin (alcuni valori sono stime). Altissima per carbonio e tungsteno, bassissima per elio e idrogeno."},
+ {nm:"Massa atomica",G:GR(160,z=>MASS[z-1],x=>x/294,x=>x.toFixed(1),"1 u","294 u"),d:"Massa atomica media in unità di massa atomica (u): cresce con il numero atomico."},
+ {nm:"Elettroni di valenza",G:GR(270,z=>props(z).outer,x=>x/8,x=>x,"0","8"),d:"Elettroni nel guscio più esterno: decidono come l'elemento si lega. Nei metalli di transizione sono per lo più 1-2; il palladio ne ha 0 nel guscio 5s."},
+ {nm:"Origine",f:origin,H:k=>({"Stabile (o quasi)":210,"Radioattivo naturale":40,"Sintetico":330})[k],keys:["Stabile (o quasi)","Radioattivo naturale","Sintetico"],d:"Radioattivi naturali: da polonio (84) a uranio (92). Sintetici: tecnezio, promezio e tutti gli elementi dopo l'uranio, prodotti solo in laboratorio."}
+];
+const hsl=(h,s,l)=>`hsl(${h} ${s}% ${l}%)`;
+function paint(h,t){
+  if(h==null)return{bg:"var(--sel)",bd:"var(--line)",fg:"var(--mut)"};
+  if(t==null)return dark?{bg:hsl(h,45,24),bd:hsl(h,55,50),fg:"var(--txt)"}:{bg:hsl(h,75,87),bd:hsl(h,55,62),fg:"var(--txt)"};
+  const l=dark?18+t*42:92-t*52;
+  return{bg:hsl(h,dark?60:75,l),bd:hsl(h,60,dark?l+14:l-8),fg:dark?(l>46?"#0a0a0a":"var(--txt)"):(l<56?"#fff":"var(--txt)")};
+}
+function vinfo(v,z){
+  if(v.G){const x=v.G.v(z);return x==null?{h:null,t:null,val:"—"}:{h:v.G.h,t:Math.max(0,Math.min(1,v.G.t(x))),val:v.G.f(x)};}
+  const k=v.f(z);return{key:k,h:v.H(k),t:null,val:v.val?v.val(z):""};
+}
+let vi=0,hl=null,ptSel=1,ptShown=1;
+function renderPT(){
+  const v=VIEWS[vi];
+  $("vw").innerHTML=VIEWS.map((x,i)=>`<button class="${i===vi?"on":""}" data-v="${i}">${x.nm}</button>`).join("");
+  let h="";
+  for(let g=1;g<=18;g++)h+=`<div class="gl" style="grid-column:${g+1};grid-row:1">${g}</div>`;
+  for(let p=1;p<=7;p++)h+=`<div class="gl" style="grid-column:1;grid-row:${p+1}">${p}</div>`;
+  h+='<div style="grid-row:9;grid-column:1/-1;height:6px"></div><div class="ph" style="grid-column:4;grid-row:7">57–71</div><div class="ph" style="grid-column:4;grid-row:8">89–103</div>';
+  for(let z=1;z<=118;z++){
+    const [c,r]=pos(z),i=vinfo(v,z),P=paint(i.h,i.t),dim=hl!=null&&String(i.key)!==String(hl);
+    h+=`<div class="ce${z===ptSel?" sel":""}${dim?" dim":""}" data-z="${z}" style="grid-column:${c+1};grid-row:${r};background:${P.bg};border-color:${P.bd};color:${P.fg}"><span class="t"><i>${z}</i><i>${i.val}</i></span><span class="s">${SYM[z-1]}</span><span class="n">${NAME[z-1]}</span></div>`;
+  }
+  $("grid").innerHTML=h;
+  let lg;
+  if(v.G)lg=`<div class="bar" style="background:linear-gradient(90deg,${paint(v.G.h,0).bg},${paint(v.G.h,1).bg})"></div><div class="bl"><span>${v.G.lo}</span><span>${v.G.hi}</span></div><div class="bl"><span>Grigio = dato non disponibile</span></div>`;
+  else lg=v.keys.map(k=>{const P=paint(v.H(k),null),n=[...Array(118)].filter((_,j)=>String(v.f(j+1))===String(k)).length;
+    return `<div class="lg${String(hl)===String(k)?" on":""}" data-k="${k}"><i style="background:${P.bg};border-color:${P.bd}"></i>${v.lab?v.lab(k):k}<small>${n}</small></div>`;}).join("");
+  $("vd").innerHTML=`<b>${v.nm}</b><p>${v.d}</p>${lg}`;
+}
+function showDetail(z){
+  ptShown=z;const P=props(z),mp=MP[z-1],en=EN[z-1];
+  const rows=[["Categoria",CAT(z)],["Periodo",P.nmax],["Gruppo",P.g||"— (blocco f)"],["Blocco",P.blk],["Stato a 25 °C",state(z)],["Origine",origin(z)],["Configurazione",cfgShort(z)],["Elettroni di valenza",P.outer],["Elettronegatività",en?en.toFixed(2):"n.d."],["Punto di fusione",mp?`${mp} K (${Math.round(mp-273.15)} °C)`:"n.d."],["Neutroni","≈ "+(Math.round(MASS[z-1])-z)]];
+  $("dt").innerHTML=`<div class="dh"><span class="ds" style="color:${tc(P.blk)}">${SYM[z-1]}</span><div><b style="font-size:17px;font-weight:400">${NAME[z-1]}</b><br><span style="color:var(--mut)">Z = ${z} · ${MASS[z-1]} u</span></div></div>
+<table>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("")}</table>
+<details open><summary>Perché è qui?</summary>${why(z)}</details>
+<div class="row"><button id="o3">Apri nell'atomo 3D →</button></div>`;
+}
+function openPT(z){ptSel=z;$("pt").classList.add("on");renderPT();showDetail(z);}
+const closePT=()=>$("pt").classList.remove("on");
+$("tb").onclick=()=>openPT(Z);$("gp").onclick=()=>openPT(Z);$("pc2").onclick=closePT;
+addEventListener("keydown",e=>{if(e.key==="Escape")closePT();});
+$("vw").onclick=e=>{const i=e.target.dataset.v;if(i==null)return;vi=+i;hl=null;renderPT();};
+$("vd").onclick=e=>{const t=e.target.closest("[data-k]");if(!t)return;hl=String(hl)===t.dataset.k?null:t.dataset.k;renderPT();};
+$("grid").onmouseover=e=>{const t=e.target.closest(".ce");if(t)showDetail(+t.dataset.z);};
+$("grid").onmouseleave=()=>showDetail(ptSel);
+$("grid").onclick=e=>{const t=e.target.closest(".ce");if(!t)return;ptSel=+t.dataset.z;$("grid").querySelectorAll(".sel").forEach(x=>x.classList.remove("sel"));t.classList.add("sel");showDetail(ptSel);};
+$("dt").onclick=e=>{if(e.target.id==="o3"){closePT();go(ptShown);}};
+
+let dark=false;
+function setTheme(t){
+  dark=t==="dark";document.documentElement.dataset.theme=t;
+  try{localStorage.setItem("th",t);}catch(e){}
+  INK.set(dark?0xf5f5f5:0x0a0a0a);GRY.set(dark?0x707070:0x9e9e9e);
+  mP.color.copy(INK);mN.color.set(dark?0x7a7a7a:0xb4b4b4);
+  PM.blending=dark?THREE.AdditiveBlending:THREE.NormalBlending;PM.opacity=dark?0.6:0.5;PM.needsUpdate=true;
+  scene.background=new THREE.Color(dark?0x050505:0xffffff);
+  probeMesh.traverse(o=>{if(o.material)o.material.color.copy(INK);});
+  if($("pt").classList.contains("on"))renderPT();
+  if(atom.children.length)go(Z);
+}
+$("th").onclick=()=>setTheme(dark?"light":"dark");
+let t_="";try{t_=localStorage.getItem("th")||"";}catch(e){}
+setTheme(t_||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
+build(6);
+</script>
+</body>
+</html>
